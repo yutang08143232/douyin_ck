@@ -1,0 +1,104 @@
+# ========== 抖音续火花脚本配置 ==========
+
+# 抖音 Cookie（从浏览器复制，首次手动填写）
+douyin:
+  cookie: ""  # 完整cookie字符串
+
+  # 浏览器设置
+  headless: true  # 是否无头模式（Linux服务器建议true）
+  user_data_dir: "./browser_data"  # 浏览器数据目录（保存登录状态）
+
+# 消息API配置
+message_api:
+  # 模式：mock（内置随机消息）/ real（真实API文本）/ sticker（表情包图片）
+  mode: "mock"
+
+  # 真实API配置（mode=real时生效）
+  real:
+    url: "https://your-api.example.com/api/message"
+    method: "GET"  # GET 或 POST
+    headers: {}
+    params: {}     # GET请求参数
+    body: {}       # POST请求体
+    # 从返回结果中提取消息的JSON路径（点分隔）
+    message_path: "data.content"
+
+  # 表情包配置（mode=sticker时生效）
+  sticker:
+    url: "https://api.yutangxiaowu.cn/api/gif/random"
+    local: "王者荣耀局内表情包"  # 表情包合集名称
+    n: 1  # 每次获取数量（实际随机选1张）
+    # API返回数据的路径配置
+    image_list_path: "data.list"  # 图片列表的JSON路径
+    image_url_path: "url"         # 单张图片URL的JSON路径
+
+  # mock消息池（mode=mock时生效）
+  mock:
+    messages:
+      - "早安~ 今天也要开心哦！"
+      - "记得按时吃饭呀~"
+      - "今天天气不错，心情也要棒棒哒！"
+      - "又一天啦，继续加油~"
+      - "晚安好梦，明天见~"
+
+# 好友列表（支持三级标识：优先nickname，其次sec_uid，最后user_id）
+friends:
+  - nickname: "好友A昵称"
+    sec_uid: ""
+    user_id: ""
+    remark: "最好的朋友"  # 备注，用于日志
+
+  - nickname: "好友B昵称"
+    sec_uid: "MS4wLjABAAAA..."
+    user_id: ""
+    remark: "同事"
+
+# 发送设置
+send:
+  retry_times: 3        # 失败重试次数
+  retry_delay: 5        # 每次重试间隔（秒）
+  friend_interval: 10   # 每个好友之间的间隔（秒），避免风控
+  daily_time: "01:00"   # 每天发送时间（仅用于说明，实际由crontab控制）
+
+# 邮箱通知配置
+email:
+  enabled: false  # 是否启用邮箱通知
+
+  # SMTP服务器配置（默认163邮箱）
+  smtp_server: "smtp.163.com"
+  smtp_port: 465
+  use_ssl: true
+  sender: "your-email@163.com"
+  password: "your-auth-code"  # 授权码，不是登录密码
+
+  # 收件人
+  receivers:
+    - "your-email@163.com"
+
+  # 通知触发条件
+  notify_on:
+    all_failed: true    # 所有好友全部发送失败时通知
+    cookie_expired: true  # cookie过期/刷新失败时通知
+    daily_summary: false  # 每日发送完成后发送简报
+
+# Web管理面板配置
+web:
+  enabled: true        # 是否启用Web管理面板
+  host: "0.0.0.0"     # 监听地址（0.0.0.0表示所有地址可访问）
+  port: 5000           # 端口号
+  username: "admin"    # 登录用户名
+  password: "admin123" # 登录密码（请务必修改！）
+  secret_key: "change-me-to-a-random-string"  # Session密钥，请修改为随机字符串
+
+  # HTTPS配置（可选，生产环境建议启用）
+  https:
+    enabled: false
+    cert_file: ""  # SSL证书路径
+    key_file: ""   # SSL私钥路径
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG / INFO / WARNING / ERROR
+  file: "./logs/douyin_spark.log"
+  max_size_mb: 10
+  backup_count: 5

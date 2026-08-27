@@ -1,0 +1,4 @@
+playwright>=1.40.0
+PyYAML>=6.0
+requests>=2.31.0
+Flask>=3.0.0

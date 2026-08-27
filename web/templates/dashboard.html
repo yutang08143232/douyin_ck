@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抖音续火花 - 管理面板</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🔥</span>
+                <span class="logo-text">续火花管理</span>
+            </div>
+            <nav class="nav">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <span class="nav-icon">📊</span> 仪表盘
+                </a>
+                <a href="#" class="nav-item" data-tab="friends">
+                    <span class="nav-icon">👥</span> 好友管理
+                </a>
+                <a href="#" class="nav-item" data-tab="cookie">
+                    <span class="nav-icon">🍪</span> Cookie设置
+                </a>
+                <a href="#" class="nav-item" data-tab="message">
+                    <span class="nav-icon">💬</span> 消息设置
+                </a>
+                <a href="#" class="nav-item" data-tab="email">
+                    <span class="nav-icon">📧</span> 邮箱设置
+                </a>
+                <a href="#" class="nav-item" data-tab="logs">
+                    <span class="nav-icon">📋</span> 运行日志
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="logout()">退出登录</button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main">
+            <!-- 仪表盘 -->
+            <section class="tab-content active" id="tab-dashboard">
+                <h2 class="page-title">仪表盘</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-friends">0</div>
+                            <div class="stat-label">好友数量</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍪</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-cookie">-</div>
+                            <div class="stat-label">Cookie状态</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-today">0</div>
+                            <div class="stat-label">今日运行次数</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📧</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-email">-</div>
+                            <div class="stat-label">邮件通知</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>快捷操作</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="startSend()">
+                                ▶ 立即发送消息
+                            </button>
+                            <button class="btn btn-secondary" onclick="testMessage()">
+                                🎯 测试消息API
+                            </button>
+                            <button class="btn btn-secondary" onclick="testEmail()">
+                                📧 测试邮件
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="send-status-card" style="display:none;">
+                    <div class="card-header">
+                        <h3>发送状态</h3>
+                        <span class="status-badge" id="send-status-badge">运行中</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="progress-text">0 / 0</span>
+                        </div>
+                        <div id="send-results" class="send-results"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 好友管理 -->
+            <section class="tab-content" id="tab-friends">
+                <div class="page-header">
+                    <h2 class="page-title">好友管理</h2>
+                    <button class="btn btn-primary" onclick="showAddFriendModal()">+ 添加好友</button>
+                </div>
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>昵称</th>
+                                <th>sec_uid</th>
+                                <th>user_id</th>
+                                <th>备注</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="friends-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Cookie设置 -->
+            <section class="tab-content" id="tab-cookie">
+                <h2 class="page-title">Cookie设置</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>当前Cookie状态</label>
+                            <div class="cookie-status" id="cookie-status">
+                                <span class="status-dot"></span>
+                                <span id="cookie-status-text">检测中...</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cookie-input">Cookie 字符串</label>
+                            <textarea id="cookie-input" class="textarea" rows="6" placeholder="从浏览器复制完整的Cookie字符串粘贴到这里..."></textarea>
+                            <div class="form-hint">从浏览器开发者工具 → Network → 任意请求 → Request Headers → Cookie，完整复制</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="headless-checkbox">
+                                无头模式（Linux服务器建议开启，Windows调试可关闭）
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveCookieConfig()">保存设置</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 消息设置 -->
+            <section class="tab-content" id="tab-message">
+                <h2 class="page-title">消息设置</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>消息来源模式</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="msg-mode" value="mock" checked onchange="switchMsgMode('mock')">
+                                    Mock模式（内置随机消息）
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="msg-mode" value="real" onchange="switchMsgMode('real')">
+                                    真实API模式（文本消息）
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="msg-mode" value="sticker" onchange="switchMsgMode('sticker')">
+                                    表情包模式（发送图片）
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Mock消息池 -->
+                        <div id="mock-section">
+                            <div class="form-group">
+                                <label>消息池（每行一条，随机发送）</label>
+                                <textarea id="mock-messages" class="textarea" rows="8" placeholder="每行一条消息..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 真实API配置 -->
+                        <div id="real-section" style="display:none;">
+                            <div class="form-group">
+                                <label for="api-url">API URL</label>
+                                <input type="text" id="api-url" class="input" placeholder="https://api.example.com/message">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="api-method">请求方式</label>
+                                    <select id="api-method" class="input">
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="api-message-path">消息提取路径</label>
+                                    <input type="text" id="api-message-path" class="input" placeholder="data.content">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="api-headers">请求头（JSON格式）</label>
+                                <textarea id="api-headers" class="textarea" rows="3" placeholder='{"Authorization": "Bearer xxx"}'></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 表情包配置 -->
+                        <div id="sticker-section" style="display:none;">
+                            <div class="form-group">
+                                <label for="sticker-url">表情包API URL</label>
+                                <input type="text" id="sticker-url" class="input" placeholder="https://api.yutangxiaowu.cn/api/gif/random">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sticker-local">表情包合集</label>
+                                    <input type="text" id="sticker-local" class="input" placeholder="王者荣耀局内表情包">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sticker-n">获取数量</label>
+                                    <input type="number" id="sticker-n" class="input" value="1" min="1" max="50">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sticker-list-path">图片列表路径</label>
+                                    <input type="text" id="sticker-list-path" class="input" placeholder="data.list">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sticker-url-path">图片URL路径</label>
+                                    <input type="text" id="sticker-url-path" class="input" placeholder="url">
+                                </div>
+                            </div>
+                            <div class="form-hint">
+                                表情包模式下，脚本会从API随机获取一张表情包图片并发送给好友。
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="saveMessageConfig()">保存设置</button>
+                        <button class="btn btn-secondary" onclick="testMessage()">测试获取消息</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 邮箱设置 -->
+            <section class="tab-content" id="tab-email">
+                <h2 class="page-title">邮箱设置</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="email-enabled">
+                                启用邮件通知
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="smtp-server">SMTP服务器</label>
+                                <input type="text" id="smtp-server" class="input" value="smtp.163.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="smtp-port">端口</label>
+                                <input type="number" id="smtp-port" class="input" value="465">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="smtp-ssl" checked>
+                                使用SSL连接
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email-sender">发件人邮箱</label>
+                                <input type="email" id="email-sender" class="input">
+                            </div>
+                            <div class="form-group">
+                                <label for="email-password">授权码/密码</label>
+                                <input type="password" id="email-password" class="input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email-receivers">收件人（多个用逗号分隔）</label>
+                            <input type="text" id="email-receivers" class="input" placeholder="a@example.com, b@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>通知触发条件</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="notify-all-failed" checked>
+                                    全部发送失败时通知
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="notify-cookie-expired" checked>
+                                    Cookie过期时通知
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="notify-daily-summary">
+                                    每日发送完成简报
+                                </label>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveEmailConfig()">保存设置</button>
+                        <button class="btn btn-secondary" onclick="testEmail()">发送测试邮件</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 运行日志 -->
+            <section class="tab-content" id="tab-logs">
+                <div class="page-header">
+                    <h2 class="page-title">运行日志</h2>
+                    <button class="btn btn-secondary" onclick="loadLogs()">🔄 刷新</button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="log-viewer" id="log-viewer">
+                            加载中...
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 添加好友弹窗 -->
+    <div class="modal" id="friend-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">添加好友</h3>
+                <button class="modal-close" onclick="closeFriendModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="friend-nickname">昵称（必填，用于在会话列表中查找）</label>
+                    <input type="text" id="friend-nickname" class="input" placeholder="好友在抖音的昵称">
+                </div>
+                <div class="form-group">
+                    <label for="friend-secuid">sec_uid（选填，优先级次之）</label>
+                    <input type="text" id="friend-secuid" class="input" placeholder="MS4wLjABAAAA...">
+                </div>
+                <div class="form-group">
+                    <label for="friend-userid">user_id（选填，最后兜底）</label>
+                    <input type="text" id="friend-userid" class="input" placeholder="数字ID">
+                </div>
+                <div class="form-group">
+                    <label for="friend-remark">备注（用于日志识别）</label>
+                    <input type="text" id="friend-remark" class="input" placeholder="如：最好的朋友">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeFriendModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveFriend()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
